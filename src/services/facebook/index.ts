@@ -31,11 +31,43 @@ export class Facebook {
     }
   }
 
-  me() {
+  // @TODO: update return type
+  me(): Promise<any> {
     return this.get('me');
   }
 
-  private get(path, fields?: {}) {
+  write(message: string, recipient: string, is_thread?: boolean): Promise<any> {
+    let query;
+    query = {
+      messaging_type: 'RESPONSE',
+      recipient: {},
+      message: message
+    };
+    if (is_thread) {
+      query.recipient.thread_key = recipient;
+    } else {
+      query.recipient.id = recipient;
+    }
+    return this.post('me/messages', query);
+  }
+
+  private post(path, data): Promise<any> {
+    const uri = 'https://graph.facebook.com/' + this.version;
+    const qs = {
+      access_token: this.token
+    };
+    const query = {
+      method: 'POST',
+      uri: uri + '/' + path,
+      qs: qs,
+      // headers: this.headers,
+      body: data,
+      json: true
+    };
+    return request(query);
+  }
+
+  private get(path, fields?: {}): Promise<any> {
     const uri = 'https://graph.facebook.com/' + this.version;
     let qs;
     if (fields) {

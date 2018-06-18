@@ -3,6 +3,7 @@ import * as http from 'http';
 import * as util from 'util';
 import {Facebook, Wit, Logger, DEBUG} from './services';
 import {IContext, IContextCoordinates} from './services/wit';
+import {inspect} from 'util';
 
 dotEnv.config();
 
@@ -31,9 +32,19 @@ wit.message(message, witContext)
 */
 
 facebook.on('message', message => {
-  console.log('MESSAGE', message);
+  console.log('MESSAGE', inspect(message, {depth: 50}));
   if (message.forMe()) {
     console.log('IT\'S FOR ME');
+    let thread;
+    if (thread = message.fromThread()) {
+      facebook.write('Bien reçu !', thread, true)
+        .then(data => {
+          console.log('MESSAGE SUBMITTED', inspect(data, {depth: 50}));
+        })
+        .catch(error => {
+          console.log('MESSAGE ERROR', inspect(error, {depth: 50}));
+        });
+    }
   }
 });
 
