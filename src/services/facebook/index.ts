@@ -21,7 +21,9 @@ export class Facebook {
       for (let i = 0, n = request.entries.length; i < n; i++) {
         entry = request.entries[i];
         if (Object.hasOwnProperty.call(entry, 'messaging')) {
-          this.emitter.emit('messaging', entry);
+          for (let y = 0, m = entry.messaging.length; y < m; y++) {
+            this.emitter.emit('message', entry[y]);
+          }
         }
       }
     }

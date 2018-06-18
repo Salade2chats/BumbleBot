@@ -35,14 +35,13 @@ facebook.on('messaging', entry => {
 });
 http.createServer((req, res) => {
   if (req.method === 'POST') {
-    facebook.analyseRequest(req);
-
     let body = '';
     req.on('data', data => {
       body += data;
     });
     req.on('end', () => {
       logger.debug('Request received', body);
+      facebook.analyseRequest(JSON.parse(body));
     });
   }
   res.write('Cheers!');
