@@ -30,20 +30,37 @@ wit.message(message, witContext)
   });
 */
 
-facebook.on('message', entry => {
-  console.log('MESSAGE', entry);
-});
-http.createServer((req, res) => {
-  if (req.method === 'POST') {
-    let body = '';
-    req.on('data', data => {
-      body += data;
-    });
-    req.on('end', () => {
-      logger.debug('Request received', body);
-      facebook.analyseRequest(JSON.parse(body));
-    });
+facebook.on('message', message => {
+  console.log('MESSAGE', message);
+  if (message.forMe()) {
+    console.log('IT\'S FOR ME');
   }
-  res.write('Cheers!');
-  res.end();
-}).listen(process.env.PORT);
+});
+
+facebook.me()
+  .then(me => {
+    logger.info('Bot ID found', me.id);
+    process.env.BOT_ID = me.id;
+
+    http.createServer((req, res) => {
+      if (req.method === 'POST') {
+        let body = '';
+        req.on('data', data => {
+          body += data;
+        });
+        req.on('end', () => {
+          logger.debug('Request received', body);
+          facebook.analyseRequest(JSON.parse(body));
+        });
+      }
+      res.write('Cheers!');
+      res.end();
+    }).listen(process.env.PORT);
+    logger.info('Server started on port', process.env.PORT);
+
+  })
+  .catch(error => {
+    logger.critical('CANNOT FIND BOT ID', util.inspect(error));
+  });
+
+
