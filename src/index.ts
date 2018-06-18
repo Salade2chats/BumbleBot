@@ -30,8 +30,8 @@ wit.message(message, witContext)
   });
 */
 
-facebook.on('messaging', entry => {
-  console.log('MESSAGING', entry);
+facebook.on('message', entry => {
+  console.log('MESSAGE', entry);
 });
 http.createServer((req, res) => {
   if (req.method === 'POST') {

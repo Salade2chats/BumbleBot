@@ -22,7 +22,7 @@ export class Facebook {
         entry = request.entry[i];
         if (Object.hasOwnProperty.call(entry, 'messaging')) {
           for (let y = 0, m = entry.messaging.length; y < m; y++) {
-            this.emitter.emit('message', entry[y]);
+            this.emitter.emit('message', entry.messaging[y]);
           }
         }
       }
