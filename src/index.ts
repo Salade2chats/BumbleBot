@@ -77,7 +77,7 @@ facebook.on('message', (requestMessage: IRequestMessage) => {
           logger.warning('Error when Wit message text:', inspect(error, {depth: 5}));
         });
     }
-
+/*
     if (thread) {
       logger.info('requestMessage addressed from a thread');
       const message = new Message('Bien reçu !');
@@ -89,6 +89,7 @@ facebook.on('message', (requestMessage: IRequestMessage) => {
           console.log('MESSAGE ERROR', inspect(error, {depth: 5}));
         });
     }
+*/
   }
 });
 

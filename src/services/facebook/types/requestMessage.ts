@@ -35,7 +35,10 @@ export class RequestMessage implements IRequestMessage {
   }
 
   messageText(): string {
-    return this.message.message.text;
+    if (this.message.message) {
+      return this.message.message.text;
+    }
+    return null;
   }
 }
 
