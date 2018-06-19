@@ -2,6 +2,7 @@ import * as request from 'request-promise';
 import {Logger} from '../utils';
 import {FindImageIntent} from './intents';
 import {IEntities} from './entity';
+import GreetingIntent from './intents/greetingIntent';
 
 export interface IContext {
   reference_time?: string;
@@ -79,10 +80,15 @@ export class Wit {
       for (let i = 0, n = entities.intent.length; i < n; i++) {
         switch (entities.intent[i].value) {
           case 'find_image':
-            const intent = new FindImageIntent(entities);
-            intents.push(intent);
+            intents.push(new FindImageIntent(entities));
             if (this.logger) {
-              this.logger.debug('Intent detected', intent);
+              this.logger.debug('Intent detected', intents[intents.length - 1]);
+            }
+            break;
+          case 'greeting':
+            intents.push(new GreetingIntent(entities));
+            if (this.logger) {
+              this.logger.debug('Intent detected', intents[intents.length - 1]);
             }
             break;
           default:

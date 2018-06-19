@@ -27,4 +27,6 @@ export interface IReceivedMessage {
 export interface IRequestMessage {
   forMe(): boolean;
   fromThread(): string|false;
+  aboutMe(): boolean;
+  messageText(): string;
 }

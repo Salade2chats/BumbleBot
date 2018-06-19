@@ -35,10 +35,50 @@ wit.message(message, witContext)
 
 facebook.on('message', (requestMessage: IRequestMessage) => {
   logger.info('requestMessage received', inspect(requestMessage, {depth: 5}));
-  if (requestMessage.forMe()) {
-    logger.info('requestMessage addressed to the Bot');
-    let thread;
-    if (thread = requestMessage.fromThread()) {
+  if (requestMessage.forMe() || requestMessage.aboutMe()) {
+    logger.info('requestMessage addressed to the Bot or about the Bot');
+    const thread = requestMessage.fromThread();
+    const messageText = requestMessage.messageText();
+    if (thread) {
+      wit.message(messageText)
+        .then(intents => {
+          for (const intent of intents) {
+            if (<string>typeof intent === 'GreetingIntent') {
+              facebook.write(new Message('Bonjour !'), thread, true)
+                .then(data => {
+                  console.log('MESSAGE SUBMITTED', inspect(data, {depth: 5}));
+                })
+                .catch(error => {
+                  console.log('MESSAGE ERROR', inspect(error, {depth: 5}));
+                });
+            }
+            if (<string>typeof intent === 'FindImageIntent') {
+              if (intent.missingFields().length > 0) {
+                facebook.write(new Message('Je dois chercher quelle image ?'), thread, true)
+                  .then(data => {
+                    console.log('MESSAGE SUBMITTED', inspect(data, {depth: 5}));
+                  })
+                  .catch(error => {
+                    console.log('MESSAGE ERROR', inspect(error, {depth: 5}));
+                  });
+              } else {
+                facebook.write(new Message('Go chercher une image de ' + intent.subject), thread, true)
+                  .then(data => {
+                    console.log('MESSAGE SUBMITTED', inspect(data, {depth: 5}));
+                  })
+                  .catch(error => {
+                    console.log('MESSAGE ERROR', inspect(error, {depth: 5}));
+                  });
+              }
+            }
+          }
+        })
+        .catch(error => {
+          logger.warning('Error when Wit message text:', inspect(error, {depth: 5}));
+        });
+    }
+
+    if (thread) {
       logger.info('requestMessage addressed from a thread');
       const message = new Message('Bien reçu !');
       facebook.write(message, thread, true)

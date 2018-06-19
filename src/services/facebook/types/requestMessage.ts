@@ -18,7 +18,12 @@ export class RequestMessage implements IRequestMessage {
         }
       }
     }
-    const botRegExp = new RegExp('^@?' + process.env.BOT_NAME + '[\s,]+', 'gi');
+    const botRegExp = new RegExp('^@?' + process.env.BOT_NAME + '[\\s,]{1}', 'gi');
+    return (this.fromThread() && botRegExp.test(this.message.message.text));
+  }
+
+  aboutMe(): boolean {
+    const botRegExp = new RegExp(process.env.BOT_NAME, 'gi');
     return (this.fromThread() && botRegExp.test(this.message.message.text));
   }
 
@@ -27,6 +32,10 @@ export class RequestMessage implements IRequestMessage {
       return this.message.thread.id;
     }
     return false;
+  }
+
+  messageText(): string {
+    return this.message.message.text;
   }
 }
 
