@@ -42,11 +42,18 @@ facebook.on('message', (requestMessage: IRequestMessage) => {
     const thread = requestMessage.fromThread();
     const messageText = requestMessage.messageText();
     if (thread) {
+      facebook.write(thread, undefined, 'mark_seen', true)
+        .then(data => {
+          console.log('ACTION SUBMITTED', inspect(data, {depth: 5}));
+        })
+        .catch(error => {
+          console.log('ACTION ERROR', inspect(error, {depth: 5}));
+        });
       wit.message(messageText)
         .then(intents => {
           for (const intent of intents) {
             if (intent instanceof GreetingIntent) {
-              facebook.write(new Message('Bonjour !'), thread, true)
+              facebook.write(thread, new Message('Bonjour !'), undefined, true)
                 .then(data => {
                   console.log('MESSAGE SUBMITTED', inspect(data, {depth: 5}));
                 })
@@ -56,7 +63,7 @@ facebook.on('message', (requestMessage: IRequestMessage) => {
             }
             if (intent instanceof FindImageIntent) {
               if (intent.missingFields().length > 0) {
-                facebook.write(new Message('Je dois chercher quelle image ?'), thread, true)
+                facebook.write(thread, new Message('Je dois chercher quelle image ?'), undefined, true)
                   .then(data => {
                     console.log('MESSAGE SUBMITTED', inspect(data, {depth: 5}));
                   })
@@ -64,7 +71,7 @@ facebook.on('message', (requestMessage: IRequestMessage) => {
                     console.log('MESSAGE ERROR', inspect(error, {depth: 5}));
                   });
               } else {
-                facebook.write(new Message('Go chercher une image de ' + intent.subject), thread, true)
+                facebook.write(thread, new Message('Go chercher une image de ' + intent.subject), undefined, true)
                   .then(data => {
                     console.log('MESSAGE SUBMITTED', inspect(data, {depth: 5}));
                   })

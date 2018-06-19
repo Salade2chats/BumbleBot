@@ -37,13 +37,21 @@ export class Facebook {
     return this.get('me');
   }
 
-  write(message: Message, recipient: string, is_thread?: boolean): Promise<any> {
+  write(recipient: string, message?: Message, action?: string, is_thread?: boolean): Promise<any> {
+    if (!message && !action) {
+      throw Error('Facebook: message or action is required to write.');
+    }
     let query;
     query = {
-      messaging_type: 'RESPONSE',
       recipient: {},
-      message: message.expose()
     };
+    if (message) {
+      query.messaging_type = 'RESPONSE';
+      query.message = message.expose();
+    }
+    if (action) {
+      query.sender_action = action;
+    }
     if (is_thread) {
       query.recipient.thread_key = recipient;
     } else {
