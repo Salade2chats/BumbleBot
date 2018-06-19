@@ -1,4 +1,4 @@
-import {IAttachment} from './attachment';
+import {IAttachment, IAttachmentFormatted} from '../interfaces';
 
 export class AttachmentImage implements IAttachment {
   public readonly type = 'image';
@@ -11,7 +11,7 @@ export class AttachmentImage implements IAttachment {
     };
   }
 
-  expose(): IAttachment {
+  expose(): IAttachmentFormatted {
     return {
       type: this.type,
       payload: this.payload

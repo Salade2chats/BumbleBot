@@ -1,9 +1,9 @@
-import {IQuickReply} from './quickReply';
+import {IQuickReply, IQuickReplyFormatted} from '../interfaces';
 
 export class QuickReplyPhoneNumber implements IQuickReply {
   public readonly content_type = 'user_phone_number';
 
-  expose(): IQuickReply {
+  expose(): IQuickReplyFormatted {
     return {
       content_type: this.content_type
     };

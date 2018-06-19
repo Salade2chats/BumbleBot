@@ -5,6 +5,7 @@ import {Facebook, Wit, Logger, DEBUG} from './services';
 import {IContext, IContextCoordinates} from './services/wit';
 import {inspect} from 'util';
 import {Message} from './services/facebook/types/message';
+import {IRequestMessage} from './services/facebook/interfaces';
 
 dotEnv.config();
 
@@ -32,7 +33,7 @@ wit.message(message, witContext)
   });
 */
 
-facebook.on('message', requestMessage => {
+facebook.on('message', (requestMessage: IRequestMessage) => {
   logger.info('requestMessage received', inspect(requestMessage, {depth: 5}));
   if (requestMessage.forMe()) {
     logger.info('requestMessage addressed to the Bot');
@@ -42,10 +43,10 @@ facebook.on('message', requestMessage => {
       const message = new Message('Bien reçu !');
       facebook.write(message, thread, true)
         .then(data => {
-          console.log('MESSAGE SUBMITTED', inspect(data, {depth: 50}));
+          console.log('MESSAGE SUBMITTED', inspect(data, {depth: 5}));
         })
         .catch(error => {
-          console.log('MESSAGE ERROR', inspect(error, {depth: 50}));
+          console.log('MESSAGE ERROR', inspect(error, {depth: 5}));
         });
     }
   }
@@ -55,6 +56,8 @@ facebook.me()
   .then(me => {
     logger.info('Bot ID found', me.id);
     process.env.BOT_ID = me.id;
+    logger.info('Bot name found', me.name);
+    process.env.BOT_NAME = me.name;
 
     http.createServer((req, res) => {
       if (req.method === 'POST') {

@@ -1,33 +1,9 @@
-export interface IRequestMessage {
-  sender: {
-    id: string,
-    community: {
-      id: string
-    }
-  };
-  recipient: {
-    id: string
-  };
-  thread?: {
-    id: string;
-  };
-  timestamp: number;
-  message: {
-    mid: string;
-    seq: number;
-    text: string;
-  };
-  mentions?: {
-    offset: number;
-    length: number;
-    id: string;
-  }[];
-}
+import {IReceivedMessage, IRequestMessage} from '../interfaces';
 
-export class RequestMessage {
-  private readonly message: IRequestMessage;
+export class RequestMessage implements IRequestMessage {
+  private readonly message: IReceivedMessage;
 
-  constructor(message: IRequestMessage) {
+  constructor(message: IReceivedMessage) {
     this.message = message;
   }
 
@@ -42,14 +18,15 @@ export class RequestMessage {
         }
       }
     }
-    return false;
+    const botRegExp = new RegExp('^@?' + process.env.BOT_NAME + '[\s,]+', 'gi');
+    return (this.fromThread() && botRegExp.test(this.message.message.text));
   }
 
-  fromThread(): string|null {
+  fromThread(): string|false {
     if (Object.hasOwnProperty.call(this.message, 'thread')) {
       return this.message.thread.id;
     }
-    return null;
+    return false;
   }
 }
 

@@ -1,4 +1,4 @@
-import {IQuickReply} from './quickReply';
+import {IQuickReply, IQuickReplyFormatted} from '../interfaces';
 
 export class QuickReplyText implements IQuickReply {
   public readonly content_type = 'text';
@@ -15,7 +15,7 @@ export class QuickReplyText implements IQuickReply {
     }
   }
 
-  expose(): IQuickReply {
+  expose(): IQuickReplyFormatted {
     return {
       content_type: this.content_type,
       title: this.title,
