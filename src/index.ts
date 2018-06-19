@@ -1,11 +1,12 @@
 import * as dotEnv from 'dotenv';
 import * as http from 'http';
 import * as util from 'util';
-import {Facebook, Wit, Logger, DEBUG} from './services';
+import {Facebook, Wit, Logger, DEBUG, default as FindImageIntent} from './services';
 import {IContext, IContextCoordinates} from './services/wit';
 import {inspect} from 'util';
 import {Message} from './services/facebook/types/message';
 import {IRequestMessage} from './services/facebook/interfaces';
+import GreetingIntent from './services/wit/intents/greetingIntent';
 
 dotEnv.config();
 
@@ -43,7 +44,7 @@ facebook.on('message', (requestMessage: IRequestMessage) => {
       wit.message(messageText)
         .then(intents => {
           for (const intent of intents) {
-            if (<string>typeof intent === 'GreetingIntent') {
+            if (intent instanceof GreetingIntent) {
               facebook.write(new Message('Bonjour !'), thread, true)
                 .then(data => {
                   console.log('MESSAGE SUBMITTED', inspect(data, {depth: 5}));
@@ -52,7 +53,7 @@ facebook.on('message', (requestMessage: IRequestMessage) => {
                   console.log('MESSAGE ERROR', inspect(error, {depth: 5}));
                 });
             }
-            if (<string>typeof intent === 'FindImageIntent') {
+            if (intent instanceof FindImageIntent) {
               if (intent.missingFields().length > 0) {
                 facebook.write(new Message('Je dois chercher quelle image ?'), thread, true)
                   .then(data => {
