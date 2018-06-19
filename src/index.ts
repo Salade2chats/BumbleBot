@@ -1,12 +1,13 @@
 import * as dotEnv from 'dotenv';
 import * as http from 'http';
 import * as util from 'util';
-import {Facebook, Wit, Logger, DEBUG, default as FindImageIntent} from './services';
+import {Facebook, Wit, Logger, DEBUG} from './services';
 import {IContext, IContextCoordinates} from './services/wit';
 import {inspect} from 'util';
-import {Message} from './services/facebook/types/message';
+import {Message} from './services/facebook/types';
 import {IRequestMessage} from './services/facebook/interfaces';
-import GreetingIntent from './services/wit/intents/greetingIntent';
+import {GreetingIntent} from './services/wit/intents/greetingIntent';
+import {FindImageIntent} from './services/wit/intents';
 
 dotEnv.config();
 
