@@ -4,6 +4,7 @@ import * as util from 'util';
 import {Facebook, Wit, Logger, DEBUG} from './services';
 import {IContext, IContextCoordinates} from './services/wit';
 import {inspect} from 'util';
+import {Message} from './services/facebook/types/message';
 
 dotEnv.config();
 
@@ -31,13 +32,15 @@ wit.message(message, witContext)
   });
 */
 
-facebook.on('message', message => {
-  console.log('MESSAGE', inspect(message, {depth: 50}));
-  if (message.forMe()) {
-    console.log('IT\'S FOR ME');
+facebook.on('message', requestMessage => {
+  logger.info('requestMessage received', inspect(requestMessage, {depth: 5}));
+  if (requestMessage.forMe()) {
+    logger.info('requestMessage addressed to the Bot');
     let thread;
-    if (thread = message.fromThread()) {
-      facebook.write('Bien reçu !', thread, true)
+    if (thread = requestMessage.fromThread()) {
+      logger.info('requestMessage addressed from a thread');
+      const message = new Message('Bien reçu !');
+      facebook.write(message, thread, true)
         .then(data => {
           console.log('MESSAGE SUBMITTED', inspect(data, {depth: 50}));
         })

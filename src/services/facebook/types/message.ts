@@ -1,55 +1,44 @@
+import {IAttachment} from './attachment';
+import {IQuickReplies} from './quickReplies';
+import {IQuickReply} from './quickReply';
+
 export interface IMessage {
-  sender: {
-    id: string,
-    community: {
-      id: string
-    }
-  };
-  recipient: {
-    id: string
-  };
-  thread?: {
-    id: string;
-  };
-  timestamp: number;
-  message: {
-    mid: string;
-    seq: number;
-    text: string;
-  };
-  mentions?: {
-    offset: number;
-    length: number;
-    id: string;
-  }[];
+  text?: string;
+  attachment?: IAttachment;
+  quick_replies?: IQuickReply[];
+  metadata?: string;
 }
 
-export class Message {
-  private readonly message: IMessage;
+export class Message implements IMessage {
+  public readonly text: string;
+  public readonly attachment: IAttachment;
+  public readonly quick_replies: IQuickReply[];
+  public readonly metadata: string;
 
-  constructor(message: IMessage) {
-    this.message = message;
+  constructor(text?: string, attachment?: IAttachment, quick_replies?: IQuickReplies, metadata?: string) {
+    this.text = text;
+    this.attachment = attachment;
+    this.quick_replies = quick_replies.expose();
+    this.metadata = metadata;
+    if (!this.text && !this.attachment && !this.quick_replies) {
+      throw Error('Message: at least a text, an attachment or a quick_reply is required.');
+    }
   }
 
-  forMe(): boolean {
-    if (!this.fromThread() && this.message.recipient.id === process.env.BOT_ID) {
-      return true;
+  expose(): IMessage {
+    const message: IMessage = {
+      text: this.text
+    };
+    if (this.attachment) {
+      message.attachment = this.attachment.expose();
     }
-    if (this.fromThread() && Object.hasOwnProperty.call(this.message, 'mentions')) {
-      for (const mention of this.message.mentions) {
-        if (mention.offset === 0 && mention.id === process.env.BOT_ID) {
-          return true;
-        }
-      }
+    if (this.quick_replies) {
+      message.quick_replies = this.quick_replies;
     }
-    return false;
-  }
-
-  fromThread(): string|null {
-    if (Object.hasOwnProperty.call(this.message, 'thread')) {
-      return this.message.thread.id;
+    if (this.metadata) {
+      message.metadata = this.metadata;
     }
-    return null;
+    return message;
   }
 }
 

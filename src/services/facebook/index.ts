@@ -1,5 +1,6 @@
 import * as EventEmitter from 'events';
 import * as request from 'request-promise';
+import RequestMessage from './types/requestMessage';
 import Message from './types/message';
 
 export class Facebook {
@@ -24,7 +25,7 @@ export class Facebook {
         entry = req.entry[i];
         if (Object.hasOwnProperty.call(entry, 'messaging')) {
           for (let y = 0, m = entry.messaging.length; y < m; y++) {
-            this.emitter.emit('message', new Message(entry.messaging[y]));
+            this.emitter.emit('message', new RequestMessage(entry.messaging[y]));
           }
         }
       }
@@ -36,12 +37,12 @@ export class Facebook {
     return this.get('me');
   }
 
-  write(message: string, recipient: string, is_thread?: boolean): Promise<any> {
+  write(message: Message, recipient: string, is_thread?: boolean): Promise<any> {
     let query;
     query = {
       messaging_type: 'RESPONSE',
       recipient: {},
-      message: message
+      message: message.expose()
     };
     if (is_thread) {
       query.recipient.thread_key = recipient;
