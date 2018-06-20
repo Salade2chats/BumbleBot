@@ -1,0 +1,8 @@
+#!/bin/sh
+echo $(id -u)
+if [[ $(id -u) != 0 ]]; then
+    gosu root addgroup -g $(id -g) ${USER};
+    gosu root adduser -D -u $(id -u) -h ${HOME} -H ${USER} -G ${USER};
+    gosu root chown -R $(id -u):$(id -g) ${HOME};
+fi;
+exec "$@"

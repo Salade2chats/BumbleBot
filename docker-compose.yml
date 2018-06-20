@@ -1,0 +1,13 @@
+version: '3'
+services:
+  app:
+    container_name: bumblebot
+    volumes:
+      - '.:/data'
+    build: .
+    env_file:
+      - .env
+    ports:
+      - 9042:$PORT
+    user: $UID:$GID
+    command: ["yarn", "run", "serve"]
