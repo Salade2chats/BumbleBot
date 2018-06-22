@@ -1,0 +1,44 @@
+#!/bin/sh
+
+PATCH=0
+NEW_UID=${1:-$(id -u ${USER})}
+NEW_GID=${2:-$(id -g ${USER})}
+
+function getUserHome() {
+  local USER=${1:-${USER}};
+  local USER_HOME=;
+  LINE=$(grep -F "${USER}" /etc/passwd);
+  OLD_IFS=IFS;
+  IFS=":";
+  i=0
+  for part in $LINE; do
+    i=$((i+1));
+    if [[ ${i} == 6 ]]; then
+      USER_HOME=${part};
+    fi;
+  done;
+  IFS=OLD_IFS;
+  echo ${USER_HOME};
+}
+
+if [[ ${NEW_UID} != 0 ]]; then
+  if [[ ${NEW_UID} != $(id -u ${USER}) ]]; then
+    PATCH=1
+    echo "Patch UID from $(id -u ${USER}) to ${NEW_UID}";
+  fi;
+  if [[ ${NEW_GID} != $(id -g ${USER}) ]]; then
+    PATCH=1
+    echo "Patch GID from $(id -g ${USER}) to ${NEW_GID}";
+  fi;
+  if [[ ${PATCH} == 0 ]]; then
+    echo "Nothing to patch";
+  else
+    USER_HOME=$(getUserHome ${USER});
+    gosu root sed -i -e "s/^${USER}:\([^:]*\):[0-9]*:[0-9]*/${USER}:\1:${NEW_UID}:${NEW_GID}/"  /etc/passwd;
+    gosu root sed -i -e "s/^${USER}:\([^:]*\):[0-9]*/${USER}:\1:${NEW_GID}/"  /etc/group;
+    echo "Patch owner of ${USER_HOME}";
+    gosu root chown -R ${NEW_UID}:${NEW_GID} ${USER_HOME};
+  fi;
+else
+  echo "WARNING: You are root";
+fi;
