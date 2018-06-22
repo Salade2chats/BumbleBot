@@ -8,11 +8,13 @@ import {Message} from './services/facebook/types';
 import {IRequestMessage} from './services/facebook/interfaces';
 import {GreetingIntent} from './services/wit/intents/greetingIntent';
 import {FindImageIntent} from './services/wit/intents';
+import {CustomSearch} from './services/google';
 
 dotEnv.config();
 
 const logger = new Logger(DEBUG);
 const facebook = new Facebook(process.env.FB_TOKEN, process.env.FB_VERSION);
+const googleImage = new CustomSearch(process.env.GOOGLE_APIKEY);
 const wit = new Wit(process.env.WIT_TOKEN, process.env.WIT_VERSION, logger);
 const witContext: IContext = {
   timezone: 'Europe/Paris',
@@ -34,7 +36,6 @@ wit.message(message, witContext)
     logger.warning('ERROR', util.inspect(err, {depth: 50}));
   });
 */
-
 facebook.on('message', (requestMessage: IRequestMessage) => {
   logger.info('requestMessage received', inspect(requestMessage, {depth: 5}));
   if (requestMessage.forMe() || requestMessage.aboutMe()) {
@@ -74,6 +75,11 @@ facebook.on('message', (requestMessage: IRequestMessage) => {
                 facebook.write(thread, new Message('Go chercher une image de ' + intent.subject), undefined, true)
                   .then(data => {
                     console.log('MESSAGE SUBMITTED', inspect(data, {depth: 5}));
+                    return googleImage.search(intent.subject, true);
+                  })
+                  .then(data => {
+                    // @TODO: treat THEN
+                    facebook.write(thread, new Message(data.items[0].link), undefined, true);
                   })
                   .catch(error => {
                     console.log('MESSAGE ERROR', inspect(error, {depth: 5}));
