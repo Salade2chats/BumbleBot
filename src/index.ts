@@ -81,7 +81,7 @@ facebook.on('message', (requestMessage: IRequestMessage) => {
                   .then(data => {
                     // @TODO: treat THEN
                     const image = new AttachmentImage(data.items[0].link);
-                    facebook.write(thread, new Message(data.items[0].link, image), undefined, true);
+                    facebook.write(thread, new Message(undefined, image), undefined, true);
                   })
                   .catch(error => {
                     console.log('MESSAGE ERROR', inspect(error, {depth: 5}));
