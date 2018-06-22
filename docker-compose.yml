@@ -13,6 +13,6 @@ services:
     env_file:
       - .env
     ports:
-      - 9042:$PORT
+      - $PORT:9042
     user: $UID:$GID
     command: ["yarn", "run", "serve"]

@@ -122,8 +122,8 @@ facebook.me()
       }
       res.write('Cheers!');
       res.end();
-    }).listen(process.env.PORT);
-    logger.info('Server started on port', process.env.PORT);
+    }).listen(9042);
+    logger.info('Server started on port', 9042);
 
   })
   .catch(error => {
