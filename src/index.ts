@@ -9,6 +9,7 @@ import {IRequestMessage} from './services/facebook/interfaces';
 import {GreetingIntent} from './services/wit/intents/greetingIntent';
 import {FindImageIntent} from './services/wit/intents';
 import {CustomSearch} from './services/google';
+import AttachmentImage from './services/facebook/types/attachmentImage';
 
 dotEnv.config();
 
@@ -79,7 +80,8 @@ facebook.on('message', (requestMessage: IRequestMessage) => {
                   })
                   .then(data => {
                     // @TODO: treat THEN
-                    facebook.write(thread, new Message(data.items[0].link), undefined, true);
+                    const image = new AttachmentImage(data.items[0].link);
+                    facebook.write(thread, new Message(data.items[0].link, image), undefined, true);
                   })
                   .catch(error => {
                     console.log('MESSAGE ERROR', inspect(error, {depth: 5}));

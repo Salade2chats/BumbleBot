@@ -13,7 +13,7 @@ export class CustomSearch {
     qs = {
       q: q,
       cx: this.customSearchID,
-      searchTYpe: 'image',
+      searchType: 'image',
       fields: 'items/link',
       key: this.apiKey
     };
