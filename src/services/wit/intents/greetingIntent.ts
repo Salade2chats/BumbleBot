@@ -1,9 +1,9 @@
-import {IEntities} from '../entity';
+import {IWitEntities} from '../interfaces';
 
 export class GreetingIntent {
   public name?: string;
 
-  constructor(entities: IEntities) {
+  constructor(entities: IWitEntities) {
     if (Object.hasOwnProperty.call(entities, 'name')) {
       const names = [];
       for (let i = 0, n = entities['name'].length; i < n; i++) {

@@ -1,1 +1,1 @@
-export * from './customSearch';
+export * from './GoogleClient';

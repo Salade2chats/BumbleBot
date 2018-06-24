@@ -1,0 +1,141 @@
+import * as dotEnv from 'dotenv';
+import * as http from 'http';
+import * as util from 'util';
+import {inspect} from 'util';
+import {DependencyInjector, Facebook, GoogleClient, default as ILogger, Logger, LOGGER_LEVEL_DEBUG, Wit} from './services';
+import {IContext, IContextCoordinates} from './services/wit';
+import {AttachmentImage, Message} from './services/facebook/types';
+import {IRequestMessage} from './services/facebook/interfaces';
+import {GreetingIntent} from './services/wit/intents/greetingIntent';
+import {FindImageIntent} from './services/wit/intents';
+
+const DI = DependencyInjector.getInstance();
+DI.register('logger', new Logger(LOGGER_LEVEL_DEBUG));
+DI.register('facebook', new Facebook(process.env.FB_TOKEN, process.env.FB_VERSION, DI.get('logger')));
+DI.register('wit', new Wit(process.env.WIT_TOKEN, process.env.WIT_VERSION, DI.get('logger')));
+DI.register('google', new GoogleClient(process.env.GOOGLE_APIKEY, DI.get('logger')));
+dotEnv.config();
+
+const logger: ILogger = DI.get('logger');
+
+const witContext: IContext = {
+  timezone: 'Europe/Paris',
+  locale: 'fr_FR',
+  coordinates: <IContextCoordinates>{
+    lat: 48.873,
+    long: 2.316
+  }
+};
+
+// receive message
+/*
+const message: string = 'montre nous une image de chien qui court';
+wit.message(message, witContext)
+  .then(json => {
+    logger.debug('SUCCESS', util.inspect(json, {depth: 50}));
+  })
+  .catch(function (err) {
+    logger.warning('ERROR', util.inspect(err, {depth: 50}));
+  });
+*/
+DI.get('facebook').on('message', (requestMessage: IRequestMessage) => {
+  logger.info('requestMessage received', inspect(requestMessage, {depth: 5}));
+  if (requestMessage.forMe() || requestMessage.aboutMe()) {
+    logger.info('requestMessage addressed to the Bot or about the Bot');
+    const thread = requestMessage.fromThread();
+    const messageText = requestMessage.messageText();
+    if (thread) {
+      DI.get('facebook').write(thread, undefined, 'mark_seen', true)
+        .then(data => {
+          console.log('ACTION SUBMITTED', inspect(data, {depth: 5}));
+        })
+        .catch(error => {
+          console.log('ACTION ERROR', inspect(error, {depth: 5}));
+        });
+      DI.get('wit').message(messageText)
+        .then(intents => {
+          for (const intent of intents) {
+            if (intent instanceof GreetingIntent) {
+              DI.get('facebook').write(thread, new Message('Bonjour !'), undefined, true)
+                .then(data => {
+                  console.log('MESSAGE SUBMITTED', inspect(data, {depth: 5}));
+                })
+                .catch(error => {
+                  console.log('MESSAGE ERROR', inspect(error, {depth: 5}));
+                });
+            }
+            if (intent instanceof FindImageIntent) {
+              if (intent.missingFields().length > 0) {
+                DI.get('facebook').write(thread, new Message('Je dois chercher quelle image ?'), undefined, true)
+                  .then(data => {
+                    console.log('MESSAGE SUBMITTED', inspect(data, {depth: 5}));
+                  })
+                  .catch(error => {
+                    console.log('MESSAGE ERROR', inspect(error, {depth: 5}));
+                  });
+              } else {
+                DI.get('facebook').write(thread, new Message('Go chercher une image de ' + intent.subject), undefined, true)
+                  .then(data => {
+                    console.log('MESSAGE SUBMITTED', inspect(data, {depth: 5}));
+                    return DI.get('google').findImage(intent.subject, true);
+                  })
+                  .then(data => {
+                    // @TODO: treat THEN
+                    const image = new AttachmentImage(data.items[0].link);
+                    DI.get('facebook').write(thread, new Message(undefined, image), undefined, true);
+                  })
+                  .catch(error => {
+                    console.log('MESSAGE ERROR', inspect(error, {depth: 5}));
+                  });
+              }
+            }
+          }
+        })
+        .catch(error => {
+          logger.warning('Error when Wit message text:', inspect(error, {depth: 5}));
+        });
+    }
+    /*
+        if (thread) {
+          logger.info('requestMessage addressed from a thread');
+          const message = new Message('Bien reçu !');
+          facebook.write(message, thread, true)
+            .then(data => {
+              console.log('MESSAGE SUBMITTED', inspect(data, {depth: 5}));
+            })
+            .catch(error => {
+              console.log('MESSAGE ERROR', inspect(error, {depth: 5}));
+            });
+        }
+    */
+  }
+});
+
+DI.get('facebook').me()
+  .then(me => {
+    logger.info('Bot ID found', me.id);
+    process.env.BOT_ID = me.id;
+    logger.info('Bot name found', me.name);
+    process.env.BOT_NAME = me.name;
+
+    http.createServer((req, res) => {
+      if (req.method === 'POST') {
+        let body = '';
+        req.on('data', data => {
+          body += data;
+        });
+        req.on('end', () => {
+          logger.debug('Request received', body);
+          DI.get('facebook').analyseRequest(JSON.parse(body));
+        });
+      }
+      res.write('Cheers!');
+      res.end();
+    }).listen(9042);
+    logger.info('Server started on port', 9042);
+  })
+  .catch(error => {
+    logger.critical('CANNOT FIND BOT ID', util.inspect(error));
+  });
+
+

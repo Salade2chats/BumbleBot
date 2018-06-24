@@ -1,10 +1,10 @@
-import {IEntities} from '../entity';
+import {IWitEntities} from '../interfaces';
 
 export class FindImageIntent {
   public subject: string;
   public isAnimated?: boolean;
 
-  constructor(entities: IEntities) {
+  constructor(entities: IWitEntities) {
     if (Object.hasOwnProperty.call(entities, 'subject')) {
       const subjects = [];
       for (let i = 0, n = entities['subject'].length; i < n; i++) {

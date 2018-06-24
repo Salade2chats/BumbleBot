@@ -1,3 +1,3 @@
-export * from './wit';
 export * from './intents';
-export * from './entity';
+export * from './interfaces';
+export * from './wit';

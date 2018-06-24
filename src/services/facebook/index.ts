@@ -2,16 +2,22 @@ import * as EventEmitter from 'events';
 import * as request from 'request-promise';
 import RequestMessage from './types/requestMessage';
 import Message from './types/message';
+import {ILogger} from '../logger';
+import {IFacebookRecipient} from '../index';
 
 export class Facebook {
-  private token: string;
-  private version: string;
   private readonly emitter: EventEmitter;
+  private readonly logger: ILogger;
+  private readonly token: string;
+  private readonly version: string;
 
-  constructor(token: string, version: string) {
+  constructor(token: string, version: string, logger?: ILogger) {
     this.token = token;
     this.version = version;
     this.emitter = new EventEmitter();
+    if (logger) {
+      this.logger = logger;
+    }
   }
 
   on(type, callback) {
@@ -37,7 +43,7 @@ export class Facebook {
     return this.get('me');
   }
 
-  write(recipient: string, message?: Message, action?: string, is_thread?: boolean): Promise<any> {
+  write(recipient: IFacebookRecipient, message?: Message, action?: string): Promise<any> {
     if (!message && !action) {
       throw Error('Facebook: message or action is required to write.');
     }
@@ -52,10 +58,10 @@ export class Facebook {
     if (action) {
       query.sender_action = action;
     }
-    if (is_thread) {
-      query.recipient.thread_key = recipient;
+    if (recipient.is_thread) {
+      query.recipient.thread_key = recipient.id;
     } else {
-      query.recipient.id = recipient;
+      query.recipient.id = recipient.id;
     }
     return this.post('me/messages', query);
   }
@@ -96,5 +102,8 @@ export class Facebook {
     return request(query);
   }
 }
+
+export * from './interfaces';
+export * from './types';
 
 export default Facebook;

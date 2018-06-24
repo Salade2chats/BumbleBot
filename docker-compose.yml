@@ -16,3 +16,4 @@ services:
       - $PORT:9042
     user: $UID:$GID
     command: ["yarn", "run", "serve"]
+    dns: 8.8.8.8

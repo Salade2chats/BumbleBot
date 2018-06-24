@@ -1,3 +1,5 @@
+import {IFacebookRecipient} from "./index";
+
 export interface IReceivedMessage {
   sender: {
     id: string,
@@ -28,5 +30,7 @@ export interface IRequestMessage {
   forMe(): boolean;
   fromThread(): string|false;
   aboutMe(): boolean;
+  senderId(): string;
+  answerRecipient(): IFacebookRecipient;
   messageText(): string;
 }

@@ -1,4 +1,5 @@
-import {IReceivedMessage, IRequestMessage} from '../interfaces';
+import {IFacebookRecipient, IReceivedMessage, IRequestMessage} from '../interfaces';
+import {FacebookRecipient} from './facebookRecipient';
 
 export class RequestMessage implements IRequestMessage {
   private readonly message: IReceivedMessage;
@@ -27,11 +28,24 @@ export class RequestMessage implements IRequestMessage {
     return (this.fromThread() && botRegExp.test(this.message.message.text));
   }
 
-  fromThread(): string|false {
+  fromThread(): string | false {
     if (Object.hasOwnProperty.call(this.message, 'thread')) {
       return this.message.thread.id;
     }
     return false;
+  }
+
+  senderId(): string {
+    return this.message.sender.id;
+  }
+
+  answerRecipient(): IFacebookRecipient {
+    const thread = this.fromThread();
+    if (thread) {
+      return new FacebookRecipient(thread, true);
+    } else {
+      return new FacebookRecipient(this.senderId(), false);
+    }
   }
 
   messageText(): string {

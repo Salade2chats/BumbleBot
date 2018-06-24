@@ -1,25 +1,14 @@
 import * as colors from 'colors/safe';
+import {ILogger, ITheme} from './interfaces';
 
-export const EMERGENCY = 0; // system is unusable
-export const ALERT = 1; // action must be taken immediately
-export const CRITICAL = 2; // the system is in critical condition
-export const ERROR = 3; // error condition
-export const WARNING = 4; // warning condition
-export const NOTICE = 5; // a normal but significant condition
-export const INFO = 6; // a purely informational message
-export const DEBUG = 7; // messages to debug an application
-
-export interface ITheme {
-  title: string|string[];
-  emergency: string|string[];
-  alert: string|string[];
-  critical: string|string[];
-  error: string|string[];
-  warning: string|string[];
-  notice: string|string[];
-  info: string|string[];
-  debug: string|string[];
-}
+export const LOGGER_LEVEL_EMERGENCY = 0; // system is unusable
+export const LOGGER_LEVEL_ALERT = 1; // action must be taken immediately
+export const LOGGER_LEVEL_CRITICAL = 2; // the system is in critical condition
+export const LOGGER_LEVEL_ERROR = 3; // error condition
+export const LOGGER_LEVEL_WARNING = 4; // warning condition
+export const LOGGER_LEVEL_NOTICE = 5; // a normal but significant condition
+export const LOGGER_LEVEL_INFO = 6; // a purely informational message
+export const LOGGER_LEVEL_DEBUG = 7; // messages to debug an application
 
 const defaultTheme: ITheme = {
   title: ['blue', 'bold', 'underline'],
@@ -33,7 +22,7 @@ const defaultTheme: ITheme = {
   debug: ['gray'],
 };
 
-export class Logger {
+export class Logger implements ILogger {
 
   private readonly level: number;
 
@@ -58,7 +47,7 @@ export class Logger {
   }
 
   emergency(...args: any[]): void {
-    if (this.level >= EMERGENCY) {
+    if (this.level >= LOGGER_LEVEL_EMERGENCY) {
       const messages: any[] = [];
       for (let i: number = 0, n: number = args.length; i < n; i++) {
         messages.push(colors['emergency'](args[i]));
@@ -68,7 +57,7 @@ export class Logger {
   }
 
   alert(...args: any[]): void {
-    if (this.level >= ALERT) {
+    if (this.level >= LOGGER_LEVEL_ALERT) {
       const messages: any[] = [];
       for (let i: number = 0, n: number = args.length; i < n; i++) {
         messages.push(colors['alert'](args[i]));
@@ -78,7 +67,7 @@ export class Logger {
   }
 
   critical(...args: any[]): void {
-    if (this.level >= CRITICAL) {
+    if (this.level >= LOGGER_LEVEL_CRITICAL) {
       const messages: any[] = [];
       for (let i: number = 0, n: number = args.length; i < n; i++) {
         messages.push(colors['critical'](args[i]));
@@ -88,7 +77,7 @@ export class Logger {
   }
 
   error(...args: any[]): void {
-    if (this.level >= ERROR) {
+    if (this.level >= LOGGER_LEVEL_ERROR) {
       const messages: any[] = [];
       for (let i: number = 0, n: number = args.length; i < n; i++) {
         messages.push(colors['error'](args[i]));
@@ -98,7 +87,7 @@ export class Logger {
   }
 
   warning(...args: any[]): void {
-    if (this.level >= WARNING) {
+    if (this.level >= LOGGER_LEVEL_WARNING) {
       const messages: any[] = [];
       for (let i: number = 0, n: number = args.length; i < n; i++) {
         messages.push(colors['warning'](args[i]));
@@ -108,7 +97,7 @@ export class Logger {
   }
 
   notice(...args: any[]): void {
-    if (this.level >= NOTICE) {
+    if (this.level >= LOGGER_LEVEL_NOTICE) {
       const messages: any[] = [];
       for (let i: number = 0, n: number = args.length; i < n; i++) {
         messages.push(colors['notice'](args[i]));
@@ -118,7 +107,7 @@ export class Logger {
   }
 
   info(...args: any[]): void {
-    if (this.level >= INFO) {
+    if (this.level >= LOGGER_LEVEL_INFO) {
       const messages: any[] = [];
       for (let i: number = 0, n: number = args.length; i < n; i++) {
         messages.push(colors['info'](args[i]));
@@ -128,7 +117,7 @@ export class Logger {
   }
 
   debug(...args: any[]): void {
-    if (this.level >= DEBUG) {
+    if (this.level >= LOGGER_LEVEL_DEBUG) {
       const messages: any[] = [];
       for (let i: number = 0, n: number = args.length; i < n; i++) {
         messages.push(colors['debug'](args[i]));

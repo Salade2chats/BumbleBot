@@ -1,4 +1,5 @@
 export * from './attachmentImage';
+export * from './facebookRecipient';
 export * from './message';
 export * from './quickReplies';
 export * from './quickReplyEmail';
