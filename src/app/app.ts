@@ -43,7 +43,7 @@ export class App {
   private google: GoogleClient = DI.get('google');
 
   registerWitEvents() {
-    this.wit.on('greetingIntent', (intent: GreetingIntent, sharedData: any) => {
+    this.wit.on('GreetingIntent', (intent: GreetingIntent, sharedData: any) => {
       this.facebook.write(
         (<IRequestMessage>sharedData.requestMessage).answerRecipient(),
         new Message('Bonjour !')
