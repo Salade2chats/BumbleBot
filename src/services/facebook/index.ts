@@ -31,7 +31,10 @@ export class Facebook {
         entry = req.entry[i];
         if (Object.hasOwnProperty.call(entry, 'messaging')) {
           for (let y = 0, m = entry.messaging.length; y < m; y++) {
-            this.emitter.emit('message', new RequestMessage(entry.messaging[y]));
+            const message = new RequestMessage(entry.messaging[y]);
+            if (message.messageText()) {
+              this.emitter.emit('message', message);
+            }
           }
         }
       }
@@ -46,6 +49,9 @@ export class Facebook {
   write(recipient: IFacebookRecipient, message?: Message, action?: string): Promise<any> {
     if (!message && !action) {
       throw Error('Facebook: message or action is required to write.');
+    }
+    if (!message && !action) {
+      throw Error('Facebook: message or action is required to write, not both.');
     }
     let query;
     query = {
