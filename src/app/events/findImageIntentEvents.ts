@@ -1,14 +1,22 @@
 import * as util from 'util';
-import {AttachmentImage, DependencyInjector, Facebook, GoogleClient, GreetingIntent, IDependencyInjector, Message} from '../../services';
+import {
+  AttachmentImage,
+  DependencyInjector,
+  Facebook,
+  FindImageIntent,
+  GoogleClient,
+  IDependencyInjector,
+  Message
+} from '../../services';
 import {IFindImageIntentEventData} from './interfaces';
 
 export class FindImageIntentEvents {
-  private readonly intent;
+  private readonly intent: FindImageIntent;
   private readonly data;
   private readonly facebook: Facebook;
   private readonly google: GoogleClient;
 
-  constructor(intent: GreetingIntent, data: IFindImageIntentEventData) {
+  constructor(intent: FindImageIntent, data: IFindImageIntentEventData) {
     this.intent = intent;
     this.data = data;
     const DI: IDependencyInjector = DependencyInjector.getInstance();
@@ -27,7 +35,7 @@ export class FindImageIntentEvents {
         this.data.requestMessage.answerRecipient(),
         new Message('Compris !')
       ).then(data => {
-        return this.google.findImage(this.intent.subject, true);
+        return this.google.findImage(this.intent.subject, this.intent.isAnimated);
       }).then(data => {
         // @TODO: treat THEN
         const image = new AttachmentImage(data.link);
