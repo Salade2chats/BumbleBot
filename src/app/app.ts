@@ -1,11 +1,12 @@
 import * as dotEnv from 'dotenv';
 import * as http from 'http';
 import * as util from 'util';
-import {inspect} from 'util';
 import {
   DependencyInjector,
   Facebook,
+  FindImageIntent,
   GoogleClient,
+  GreetingIntent,
   IDependencyInjector,
   IFacebookRecipient,
   ILogger,
@@ -16,9 +17,7 @@ import {
   LOGGER_LEVEL_DEBUG,
   Wit
 } from '../services';
-import {AttachmentImage, Message} from "../services/facebook/types";
-import {FindImageIntent} from "../services/wit/intents";
-import {GreetingIntent} from "../services/wit/intents/greetingIntent";
+import {FindImageIntentEvents, GreetingIntentEvents} from './events';
 
 const DI: IDependencyInjector = DependencyInjector.getInstance();
 DI.register('logger', new Logger(LOGGER_LEVEL_DEBUG));
@@ -44,39 +43,10 @@ export class App {
 
   registerWitEvents() {
     this.wit.on('GreetingIntent', (intent: GreetingIntent, sharedData: any) => {
-      this.facebook.write(
-        (<IRequestMessage>sharedData.requestMessage).answerRecipient(),
-        new Message('Bonjour !')
-      ).then(data => {
-        console.log('MESSAGE SUBMITTED', inspect(data, {depth: 5}));
-      })
-        .catch(error => {
-          console.log('MESSAGE ERROR', inspect(error, {depth: 5}));
-        });
+      (new GreetingIntentEvents(intent, sharedData)).trigger();
     });
     this.wit.on('FindImageIntent', (intent: FindImageIntent, sharedData: any) => {
-      if (intent.missingFields().length > 0) {
-        this.facebook.write(
-          (<IRequestMessage>sharedData.requestMessage).answerRecipient(),
-          new Message('Je dois chercher quelle image ?')
-        );
-      } else {
-        this.facebook.write(
-          (<IRequestMessage>sharedData.requestMessage).answerRecipient(),
-          new Message('Compris !')
-        ).then(data => {
-          return this.google.findImage(intent.subject, true);
-        }).then(data => {
-          // @TODO: treat THEN
-          const image = new AttachmentImage(data.link);
-          this.facebook.write(
-            (<IRequestMessage>sharedData.requestMessage).answerRecipient(),
-            new Message(undefined, image)
-          );
-        }).catch(error => {
-          console.log('MESSAGE ERROR', inspect(error, {depth: 5}));
-        });
-      }
+      (new FindImageIntentEvents(intent, sharedData)).trigger();
     });
   }
 
@@ -102,7 +72,7 @@ export class App {
           undefined,
           {requestMessage: requestMessage}
         ).catch(error => {
-          this.logger.warning('Error when Wit message text:', inspect(error, {depth: 5}));
+          this.logger.warning('Error when Wit message text:', util.inspect(error, {depth: 5}));
         });
       }
     });
